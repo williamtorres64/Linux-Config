@@ -122,7 +122,7 @@ if [[ $SSH_CLIENT == ::1* ]]; then
   PROMPT_COMMAND='PS1_CMD1=$(whoami | sed "s/^./\U&/"); PS1_CMD2=$(tput sc; tput cuu1; tput hpa $(($(tput cols)-10)); date +%T; tput rc)';
   PS1='\[\e[96m\]🭨\[\e[0;106m\] \[\e[30;106m\]${PS1_CMD1}\[\e[39m\] \[\e[30;42m\] \[\e[0;46m\] \[\e[30;46m\]\w\[\e[0;46m\] \[\e[0;36m\]🭪\n\[\e[96m\] ❱\[\e[0m\]${PS1_CMD2} '
 else
-  DISTRO_ICON=$(source /etc/os-release 2>/dev/null; case "${ID,,}" in debian) echo "";; mint) echo "󰣭";; arch) echo "󰣇";; kali) echo "";; manjaro) echo "󱘊";; fedora) echo "";; parrot) echo "";; raspberry|raspbian) echo "";; *) echo "";; esac);
+  DISTRO_ICON=$(if [ -f /proc/device-tree/model ] && grep -q "^Raspberry Pi" /proc/device-tree/model 2>/dev/null; then echo ""; elif [ -f /etc/os-release ]; then source /etc/os-release; case "${ID,,}" in debian) echo "";; mint) echo "󰣭";; arch) echo "󰣇";; kali) echo "";; manjaro) echo "󱘊";; fedora) echo "";; parrot) echo "";; raspberry|raspbian) echo "";; *) echo "";; esac; else echo ""; fi)
   PROMPT_COMMAND='PS1_CMD1=$(whoami | sed "s/^./\U&/"); PS1_CMD2=$(tput sc; tput cuu1; tput hpa $(($(tput cols)-10)); date +%T; tput rc)';
   PS1='\[\e[96m\]\[\e[30;106m\]${DISTRO_ICON} ${PS1_CMD1}\[\e[96;46m\] \[\e[30;46m\]\w\[\e[0;36m\] \n\[\e[96m\] >\[\e[0m\]${PS1_CMD2} ';
 fi
