@@ -117,6 +117,9 @@ fi
 #    exec tmux new-session -A -s ${USER} >/dev/null 2>&1
 #fi
 
+# ls Colors
+LS_COLORS=$LS_COLORS:'di=1;94:' ; export LS_COLORS # Directory as bold bright blue
+
 # Prompt
 if [[ $SSH_CLIENT == ::1* ]]; then
   PROMPT_COMMAND='PS1_CMD1=$(whoami | sed "s/^./\U&/"); PS1_CMD2=$(tput sc; tput cuu1; tput hpa $(($(tput cols)-10)); date +%T; tput rc)';
