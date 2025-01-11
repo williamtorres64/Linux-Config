@@ -179,3 +179,5 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
+
+source /home/night/.config/broot/launcher/bash/br
