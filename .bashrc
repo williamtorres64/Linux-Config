@@ -145,9 +145,11 @@ export PATH=$PATH:/home/night/AppImages/
 
 # Pyenv
 export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
+# Check if pyenv exists and initialize it
+if [[ -d "$PYENV_ROOT/bin" ]]; then
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+fi
 # Local binaries
 export PATH="$PATH:/home/night/.local/bin/"
 export PICO_SDK_PATH=/home/night/Documents/Raspberry/pico/pico-sdk
@@ -179,5 +181,6 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-
-source /home/night/.config/broot/launcher/bash/br
+if [[ -d "$HOME/.config/broot" ]]; then
+	source /home/night/.config/broot/launcher/bash/br
+fi
