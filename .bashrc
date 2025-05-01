@@ -142,6 +142,7 @@ export PATH="$PATH:/opt/nvim/"
 
 # Appimages
 export PATH=$PATH:/home/night/AppImages/
+export PATH=$PATH:/home/night/Applications/
 
 # Pyenv
 export PYENV_ROOT="$HOME/.pyenv"
@@ -168,14 +169,14 @@ alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/night/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+__conda_setup="$('/home/night/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/home/night/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/night/anaconda3/etc/profile.d/conda.sh"
+    if [ -f "/home/night/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/night/miniconda3/etc/profile.d/conda.sh"
     else
-        export PATH="/home/night/anaconda3/bin:$PATH"
+        export PATH="/home/night/miniconda3/bin:$PATH"
     fi
 fi
 unset __conda_setup

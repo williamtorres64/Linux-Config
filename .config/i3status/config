@@ -1,0 +1,55 @@
+# i3status configuration file.
+# see "man i3status" for documentation.
+
+# It is important that this file is edited as UTF-8.
+# The following line should contain a sharp s:
+# ß
+# If the above line is not correctly displayed, fix your editor first!
+
+general {
+        colors = true
+        interval = 5
+		separator = "" # doens't work with i3bar output directive, don't waste another 10 minutes with that (just add the separator to each format string)
+		markup = "pango"
+}
+
+#order += "ipv6"
+#order += "wireless _first_"
+#order += "ethernet _first_"
+#order += "battery all"
+order += "disk /"
+#order += "load"
+order += "memory"
+order += "tztime local"
+
+wireless _first_ {
+        format_up = "W: (%quality at %essid) %ip"
+        format_down = "W: down"
+}
+
+ethernet _first_ {
+        format_up = "E: %ip (%speed)"
+        format_down = "E: down"
+}
+
+battery all {
+        format = "%status %percentage %remaining"
+}
+
+disk "/" {
+        format = "<span color='#1f5fad'>⋮</span> %used <span color='#0d74f2'>󰋊</span> %avail <span color='#1f5fad'>⋮</span>"
+}
+
+load {
+        format = "%1min"
+}
+
+memory {
+        format = "%used <span color='#0d74f2'></span> %available <span color='#1f5fad'>⋮</span>"
+        threshold_degraded = "1G"
+        format_degraded = "MEMORY < %available"
+}
+
+tztime local {
+        format = "%d/%m/%Y <span color='#1f5fad'>⋮</span> %H:%M <span color='#1f5fad'>⋮</span>"
+}
