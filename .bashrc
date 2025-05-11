@@ -24,17 +24,7 @@ shopt -s globstar 2>/dev/null    # Enable ** recursive globbing
 # Environment Variables
 #------------------------------------------------------------------------------
 
-# Add directories to PATH if they exist
-_add_to_path() {
-    [[ -d "$1" ]] && [[ ":$PATH:" != *":$1:"* ]] && PATH="${PATH:+"$PATH:"}$1"
-}
-
-_add_to_path "${HOME}/Documents/bashScripts"
-_add_to_path "${HOME}/bash_scripts"
-_add_to_path "${HOME}/AppImages"
-_add_to_path "${HOME}/Applications"
-_add_to_path "/opt/nvim"
-_add_to_path "${HOME}/.local/bin"
+PATH="${PATH:+"$PATH:"}${HOME}/Documents/bashScripts:${HOME}/bash_scripts:${HOME}/AppImages:${HOME}/Applications:/opt/nvim:${HOME}/.local/bin"
 
 # Pico SDK Configuration
 export PICO_SDK_PATH="${HOME}/Documents/Raspberry/pico/pico-sdk"
@@ -60,31 +50,38 @@ alias ll='ls -lhF'
 alias la='ls -AhF'
 alias l='ls -CF'
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+alias nv='nvim'
 
 #------------------------------------------------------------------------------
 # Prompt Configuration
 #------------------------------------------------------------------------------
 
-# Determine distro icon once
+# Determine distro icon
 _distro_icon() {
-    if [ -f /proc/device-tree/model ] && grep -q "^Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
-        echo ""
+    cat /tmp/_distro_icon 2>/dev/null && return
+
+    local i
+
+    if grep -q "^Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
+        i=""
     elif [ -f /etc/os-release ]; then
-        source /etc/os-release
+        . /etc/os-release
         case "${ID,,}" in
-            debian)    echo "" ;;
-            mint)      echo "󰣭" ;;
-            arch)      echo "󰣇" ;;
-            kali)      echo "" ;;
-            manjaro)   echo "󱘊" ;;
-            fedora)    echo "" ;;
-            parrot)    echo "" ;;
-            raspbian*) echo "" ;;
-            *)         echo "" ;;
+            debian)      i="" ;;
+            mint)        i="󰣭" ;;
+            arch)        i="󰣇" ;;
+            kali)        i="" ;;
+            manjaro)     i="󱘊" ;;
+            fedora)      i="" ;;
+            parrot)      i="" ;;
+            raspbian*)   i="" ;;
+            *)           i="" ;;
         esac
     else
-        echo ""
+        i=""
     fi
+
+    printf "%s" "$i" | tee /tmp/_distro_icon
 }
 
 DISTRO_ICON=$(_distro_icon)
@@ -103,10 +100,7 @@ _set_prompt() {
         PS1+='\[\e[96m\]\[\e[30;106m\]'"${DISTRO_ICON} ${user}"'\[\e[96;46m\] \[\e[30;46m\]\w\[\e[0;36m\] \[\e[0m\]'"${timestamp}"'\n\[\e[96m\] >\[\e[0m\]' 
     fi
     
-    # Right-align timestamp
-    #printf -v PS1 "$PS1" "$timestamp"
-    
-    return $last_status
+      return $last_status
 }
 
 PROMPT_COMMAND='_set_prompt'
@@ -115,40 +109,14 @@ PROMPT_COMMAND='_set_prompt'
 # Functions
 #------------------------------------------------------------------------------
 
-ws() {
-    local wsfile="${HOME}/.ws_workspace"
-    local dir
-
-    case "$1" in
-        set)
-            pwd > "$wsfile"
-            echo "Workspace set to $(pwd)"
-            ;;
-        get)
-            [ -f "$wsfile" ] && cat "$wsfile" || echo "No workspace set."
-            ;;
-        go|"")
-            if [ -f "$wsfile" ]; then
-                dir=$(<"$wsfile")
-                [ -d "$dir" ] && cd "$dir" || echo "Invalid directory: $dir"
-            else
-                echo "No workspace set."
-            fi
-            ;;
-        *)
-            echo "Usage: ws {set|get|go}"
-            return 1
-            ;;
-    esac
-}
+# (ws was rewritten in c++)
 
 #------------------------------------------------------------------------------
 # External Tools Initialization
 #------------------------------------------------------------------------------
 
 # Pyenv
-export PYENV_ROOT="${HOME}/.pyenv"
-_add_to_path "${PYENV_ROOT}/bin"
+PATH="${PATH:+"$PATH:"}${HOME}/.pyenv/bin"
 if command -v pyenv >/dev/null; then
     eval "$(pyenv init -)"
 fi
