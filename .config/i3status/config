@@ -17,7 +17,7 @@ general {
 #order += "wireless _first_"
 #order += "ethernet _first_"
 #order += "battery all"
-order += "disk /"
+order += "disk /home"
 #order += "load"
 order += "memory"
 order += "tztime local"
@@ -36,7 +36,7 @@ battery all {
         format = "%status %percentage %remaining"
 }
 
-disk "/" {
+disk "/home" {
         format = "<span color='#1f5fad'>⋮</span> %used <span color='#0d74f2'>󰋊</span> %avail <span color='#1f5fad'>⋮</span>"
 }
 

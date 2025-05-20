@@ -24,7 +24,7 @@ shopt -s globstar 2>/dev/null    # Enable ** recursive globbing
 # Environment Variables
 #------------------------------------------------------------------------------
 
-PATH="${PATH:+"$PATH:"}${HOME}/Documents/bashScripts:${HOME}/bash_scripts:${HOME}/AppImages:${HOME}/Applications:/opt/nvim:${HOME}/.local/bin"
+PATH="${PATH:+"$PATH:"}${HOME}/Scripts:${HOME}/AppImages:${HOME}/Applications:/opt/nvim:${HOME}/.local/bin"
 
 # Pico SDK Configuration
 export PICO_SDK_PATH="${HOME}/Documents/Raspberry/pico/pico-sdk"
@@ -109,7 +109,156 @@ PROMPT_COMMAND='_set_prompt'
 # Functions
 #------------------------------------------------------------------------------
 
-# (ws was rewritten in c++)
+ws() {
+    local base_wsfile_path="/tmp/.ws_workspace_"
+    local action="$1"
+    local num_arg="$2"
+    local ws_num # The actual workspace number to use (0-9)
+    local wsfile
+    local dir
+    local i # for loop counter
+
+    # Pre-processing for shorthands:
+    # "ws" -> "ws go 1"
+    # "ws <n>" -> "ws go <n>"
+    if [[ -z "$action" ]]; then
+        action="go"
+        num_arg="1" # Simulate "ws go 1" by setting num_arg
+    elif [[ "$action" =~ ^[0-9]$ ]] && [[ ${#action} -eq 1 ]] && [[ -z "$num_arg" ]]; then
+        num_arg="$action" # Move the number <n> to num_arg
+        action="go"       # Set action to "go"
+    fi
+
+    # Main logic dispatch based on action
+    case "$action" in
+        set|go)
+            if [[ -z "$num_arg" ]]; then # Default to workspace 1 if called as "ws set" or "ws go" with no number
+                ws_num=1
+            elif [[ "$num_arg" =~ ^[0-9]$ ]] && [[ ${#num_arg} -eq 1 ]]; then
+                ws_num="$num_arg"
+            else
+                echo "Error: Workspace number for '$action' must be a single digit (0-9)."
+                echo "If no number is provided (for 'set' or 'go'), it defaults to workspace 1."
+                echo "Usage: ws $action [0-9]"
+                return 1
+            fi
+            wsfile="${base_wsfile_path}${ws_num}" # Define wsfile here once ws_num is known
+
+            if [[ "$action" == "set" ]]; then
+                # Storing the full path guarantees correctness even if PWD changes for symlinks
+                local current_dir
+                current_dir=$(pwd -P)
+                if echo "$current_dir" > "$wsfile"; then
+                    echo "Workspace $ws_num set to $current_dir"
+                else
+                    echo "Error: Failed to write to workspace file $wsfile."
+                    return 1
+                fi
+            else # action == "go"
+                if [[ -f "$wsfile" ]]; then
+                    dir=$(<"$wsfile") # Read directory path from file
+                    if [[ -n "$dir" ]] && [[ -d "$dir" ]]; then
+                        if cd "$dir"; then
+                            # Optionally, print a confirmation:
+                            # echo "Changed directory to workspace $ws_num: $dir"
+                            : # Successful cd
+                        else
+                            echo "Error: Could not change directory to '$dir' for workspace $ws_num."
+                            echo "The path might be correct but permissions prevent access or it's no longer valid."
+                            return 1
+                        fi
+                    else
+                        echo "Error: Directory for workspace $ws_num ('$dir') is invalid or not found."
+                        echo "The workspace file $wsfile might be corrupted or point to a non-existent/invalid directory."
+                        echo "You can set it again with: ws set $ws_num"
+                        return 1
+                    fi
+                else
+                    echo "Workspace $ws_num is not set. Use 'ws set $ws_num' to set it."
+                    return 1
+                fi
+            fi
+            ;;
+        get)
+            if [[ "$num_arg" =~ ^[0-9]$ ]] && [[ ${#num_arg} -eq 1 ]]; then
+                ws_num="$num_arg"
+                wsfile="${base_wsfile_path}${ws_num}"
+                if [[ -f "$wsfile" ]]; then
+                    cat "$wsfile"
+                else
+                    echo "Workspace $ws_num is not set."
+                    return 1 # Indicate that the get operation couldn't find the workspace
+                fi
+            else
+                echo "Error: Workspace number (a single digit 0-9) is required for 'get'."
+                echo "Usage: ws get <0-9>"
+                return 1
+            fi
+            ;;
+        clear)
+            if [[ -z "$num_arg" ]]; then
+                # "ws clear" - clear all workspaces
+                local count_cleared=0
+                local count_found=0
+                local count_errors=0
+                echo "Attempting to clear all workspaces (0-9):"
+                for i in {0..9}; do
+                    wsfile="${base_wsfile_path}${i}"
+                    if [[ -f "$wsfile" ]]; then
+                        ((count_found++))
+                        if rm "$wsfile"; then
+                            echo "  Workspace $i cleared."
+                            ((count_cleared++))
+                        else
+                            echo "  Error: Could not clear workspace $i ($wsfile)."
+                            ((count_errors++))
+                        fi
+                    fi
+                done
+
+                if ((count_found == 0)); then
+                    echo "No workspaces were set to clear."
+                else
+                    echo "Finished: $count_cleared of $count_found found workspace(s) cleared."
+                    if ((count_errors > 0)); then
+                        echo "$count_errors workspace(s) could not be cleared due to errors."
+                        return 1 # Indicate some operations failed
+                    fi
+                fi
+            elif [[ "$num_arg" =~ ^[0-9]$ ]] && [[ ${#num_arg} -eq 1 ]]; then
+                # "ws clear <n>" - clear specific workspace
+                ws_num="$num_arg"
+                wsfile="${base_wsfile_path}${ws_num}"
+                if [[ -f "$wsfile" ]]; then
+                    if rm "$wsfile"; then
+                        echo "Workspace $ws_num cleared."
+                    else
+                        echo "Error: Could not clear workspace $ws_num ($wsfile)."
+                        return 1
+                    fi
+                else
+                    echo "Workspace $ws_num was not set, nothing to clear."
+                fi
+            else
+                echo "Error: For 'clear', provide a single digit (0-9) or no argument (to clear all)."
+                echo "Usage: ws clear [0-9]"
+                return 1
+            fi
+            ;;
+        *)
+            echo "Usage: ws {set [0-9]?|go [0-9]?|get <0-9>|clear [0-9]?|<0-9>}"
+            echo "Details:"
+            echo "  ws set [n]    - Sets workspace n (default 1) to current directory."
+            echo "  ws go [n]     - Goes to workspace n (default 1)."
+            echo "  ws get <n>    - Prints path of workspace n."
+            echo "  ws clear [n]  - Clears workspace n; if n is omitted, clears all (0-9)."
+            echo "  ws <n>        - Shorthand for 'ws go n' (n is 0-9)."
+            echo "  ws            - Shorthand for 'ws go 1'."
+            return 1
+            ;;
+    esac
+    return 0 # Default success if not returned earlier
+}
 
 #------------------------------------------------------------------------------
 # External Tools Initialization

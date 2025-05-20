@@ -5,8 +5,8 @@ return {
 
 	dependencies = {
 			{
-				'williamboman/mason-lspconfig.nvim',
-				dependencies = { 'williamboman/mason.nvim' },
+				'mason-org/mason-lspconfig.nvim',
+				dependencies = { 'mason-org/mason.nvim' },
 
 				config = function()
 					require('mason-lspconfig').setup({
@@ -16,6 +16,7 @@ return {
 							'rust_analyzer',
 							'bashls',
 							'basedpyright',
+                            'cssls',
 						},
 					})
 
@@ -43,6 +44,13 @@ return {
         capabilities = capabilities
       }
 
+      require('lspconfig')['intelephense'].setup {
+        capabilities = capabilities
+      }
+
+      require('lspconfig')['cssls'].setup {
+        capabilities = capabilities
+      }
 	  require'lspconfig'.ts_ls.setup{}
     end,
   },
@@ -88,11 +96,12 @@ return {
 	 	},
 
         mapping = cmp.mapping.preset.insert({
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          ['<C-Space>'] = cmp.mapping.complete(),
-          ['<C-e>'] = cmp.mapping.abort(),
-          ['<CR>'] = cmp.mapping.confirm({ select = true }),
+        ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+        ['<C-f>'] = cmp.mapping.scroll_docs(4),
+        ['<C-Space>'] = cmp.mapping.complete(),
+        ['<C-e>'] = cmp.mapping.abort(),
+        ['<Tab>'] = cmp.mapping.confirm({ select = true }), -- Accept with Tab
+        ['<S-Tab>'] = cmp.mapping.select_next_item(), -- Cycle backward with Shift+Tab
         }),
         sources = cmp.config.sources({
           { name = 'nvim_lsp' },
@@ -120,7 +129,7 @@ return {
     end,
   },
 	{
-		'williamboman/mason.nvim',
+		'mason-org/mason.nvim',
 		config = function() require('mason').setup(opts) end,
 	},
 
