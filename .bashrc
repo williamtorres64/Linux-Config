@@ -260,6 +260,27 @@ ws() {
     return 0 # Default success if not returned earlier
 }
 
+
+mass_replace() {
+    if [ "$#" -eq 2 ]; then
+        local dir="."
+        local original="$1"
+        local target="$2"
+    elif [ "$#" -eq 3 ]; then
+        local dir="$1"
+        local original="$2"
+        local target="$3"
+    else
+        echo "Usage:"
+        echo "  mass_replace <original> <target>"
+        echo "  mass_replace <directory> <original> <target>"
+        return 1
+    fi
+
+    find "$dir" -type f -exec sed -i "s|$original|$target|g" {} +
+}
+
+
 #------------------------------------------------------------------------------
 # External Tools Initialization
 #------------------------------------------------------------------------------
@@ -287,3 +308,13 @@ fi
 #------------------------------------------------------------------------------
 
 unset _add_to_path _distro_icon  # Remove helper functions from global scope
+export PATH="/home/night/.config/herd-lite/bin:$PATH"
+export PHP_INI_SCAN_DIR="/home/night/.config/herd-lite/bin:$PHP_INI_SCAN_DIR"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export ANDROID_HOME="/home/night/Applications/android-sdk"
+export PATH="$PATH:$ANDROID_HOME/platform-tools"
+export ANDROID_NDK_HOME="/home/night/Applications/android-ndk-r27d"
+export PATH="$PATH:$ANDROID_NDK_HOME"

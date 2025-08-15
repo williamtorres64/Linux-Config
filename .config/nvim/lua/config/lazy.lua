@@ -21,13 +21,14 @@ vim.opt.rtp:prepend(lazypath)
 --vim.g.mapleader = " "
 --vim.g.maplocalleader = "\\"
 
+vim.g.mapleader = " "
 -- Setup lazy.nvim
 require("lazy").setup({
   spec = {
     -- import your plugins
     { import = "plugins" },
 
-
+{ "catppuccin/nvim", name = "catppuccin", priority = 1000 },
 --	{"nvim-treesitter/nvim-treesitter",
 --    build = ":TSUpdate",
 --    config = function () 

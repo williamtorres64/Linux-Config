@@ -1,4 +1,4 @@
-require("night")
 require("config.lazy")
 
+require("night")
 

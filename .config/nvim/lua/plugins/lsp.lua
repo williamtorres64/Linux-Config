@@ -17,6 +17,7 @@ return {
 							'bashls',
 							'basedpyright',
                             'cssls',
+                            'html',
 						},
 					})
 
@@ -51,6 +52,11 @@ return {
       require('lspconfig')['cssls'].setup {
         capabilities = capabilities
       }
+
+      require('lspconfig')['html'].setup {
+        capabilities = capabilities
+      }
+
 	  require'lspconfig'.ts_ls.setup{}
     end,
   },
